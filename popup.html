@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinterest Header Hide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            min-height: 400px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            margin: 8px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #e60023 0%, #ff4757 100%);
+            color: white;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            font-size: 13px;
+            color: #555;
+            flex: 1;
+        }
+
+        .toggle {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle.active {
+            background: #e60023;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle.active::after {
+            transform: translateX(20px);
+        }
+
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+        }
+
+        .color-input {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .reset-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #6c757d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .threshold-input {
+            width: 60px;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .status {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Pinterest Customizer</h1>
+            <p>Customize your Pinterest experience</p>
+        </div>
+        
+        <div class="content">
+            <!-- Header Settings -->
+            <div class="setting-group">
+                <div class="setting-title">
+                    <span>📱</span>
+                    Header Settings
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">Hide header by default</div>
+                    <div class="toggle" id="hideHeaderToggle"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">Show on hover (top pixels)</div>
+                    <input type="number" class="threshold-input" id="hoverThreshold" value="80" min="10" max="200">
+                </div>
+            </div>
+
+            <!-- Content Settings -->
+            <div class="setting-group">
+                <div class="setting-title">
+                    <span>🎯</span>
+                    Content Settings
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">Hide "More Ideas" tabs</div>
+                    <div class="toggle" id="hideMoreIdeasToggle"></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="setting-label">Hide vertical navigation</div>
+                    <div class="toggle" id="hideVerticalNavToggle"></div>
+                </div>
+            </div>
+
+            <!-- Background Settings -->
+            <div class="setting-group">
+                <div class="setting-title">
+                    <span>🎨</span>
+                    Background Settings
+                </div>
+                
+                <div class="color-picker-group">
+                    <div class="setting-label">Main content background</div>
+                    <input type="color" class="color-input" id="bgColorInput" value="#ffffff">
+                    <button class="reset-btn" id="resetBgColor">Reset</button>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="status">
+                <div class="status-text" id="statusText">Settings saved automatically</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

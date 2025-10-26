@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Pinterest Header Hide",
+  "version": "1.0",
+  "description": "Hides Pinterest header by default and shows it only when hovering over the top section",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Pinterest Header Hide"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.pinterest.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_end"
+    }
+  ]
+}

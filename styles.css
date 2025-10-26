@@ -1,0 +1,73 @@
+/* Pinterest Header Hide Extension Styles */
+
+/* Only hide header when the body has the pinterest-header-hidden class */
+.pinterest-header-hidden #HeaderContent {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    transform: translateY(-100%) !important;
+    transition: transform 0.3s ease-in-out !important;
+    will-change: transform !important;
+}
+
+/* Fallback selectors in case ID changes */
+.pinterest-header-hidden [data-test-id="header"],
+.pinterest-header-hidden .QLY._he.p6V.zI7 {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1000 !important;
+    transform: translateY(-100%) !important;
+    transition: transform 0.3s ease-in-out !important;
+    will-change: transform !important;
+}
+
+/* JavaScript will handle showing/hiding the header */
+
+/* Hide the more-ideas-tabs element and its parent */
+[data-root-margin="more-ideas-tabs"] {
+    display: none !important;
+}
+
+/* Hide the vertical nav element */
+#VerticalNavContent {
+    display: none !important;
+}
+
+/* Set padding-left of immediate child of appContent */
+.appContent > * {
+    padding-left: 12px !important;
+}
+
+/* Removed old in-page color picker styles - now using popup */
+
+/* Remove the CSS hover zone - JavaScript handles this */
+
+/* Ensure smooth transitions for all header elements */
+#HeaderContent * {
+    transition: all 0.3s ease-in-out !important;
+}
+
+/* Fallback for other selectors */
+[data-test-id="header"] *,
+.QLY._he.p6V.zI7 * {
+    transition: all 0.3s ease-in-out !important;
+}
+
+/* Prevent layout shift when header is hidden */
+body {
+    padding-top: 0 !important;
+}
+
+/* Ensure the main content doesn't jump when header appears/disappears */
+#HeaderContent + * {
+    margin-top: 0 !important;
+}
+
+/* Fallback for other selectors */
+[data-test-id="header"] + * {
+    margin-top: 0 !important;
+}
