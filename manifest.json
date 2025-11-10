@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Pinterest Header Hide",
+  "name": "Pinterest Fullscreen",
   "version": "1.0",
-  "description": "Hides Pinterest header by default and shows it only when hovering over the top section",
+  "description": "Transform Pinterest into a fullscreen, distraction-free viewing experience",
   "permissions": [
     "activeTab",
     "storage"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Pinterest Header Hide"
+    "default_title": "Pinterest Fullscreen"
   },
   "content_scripts": [
     {

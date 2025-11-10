@@ -1,11 +1,13 @@
-// Pinterest Header Hide Extension
+// Pinterest Fullscreen Extension
 (function() {
     'use strict';
     
     let headerElement = null;
     let moreIdeasElement = null;
     let verticalNavElement = null;
-    let isHeaderVisible = false;
+    let scrollableOneBarElement = null;
+    let skipToContentElement = null;
+    let isMouseInTopArea = false;
     let hoverTimeout = null;
     
     // Settings
@@ -13,6 +15,9 @@
         hideHeader: true,
         hideMoreIdeas: true,
         hideVerticalNav: true,
+        hideScrollableOneBar: true,
+        hideSkipToContent: true,
+        liquidGlassTheme: false,
         hoverThreshold: 80,
         bgColor: ''
     };
@@ -36,56 +41,157 @@
         return null;
     }
     
-    // Function to find and hide the more-ideas-tabs element
-    function findAndHideMoreIdeas() {
-        const moreIdeasSelector = '[data-root-margin="more-ideas-tabs"]';
-        const element = document.querySelector(moreIdeasSelector);
+    // Function to find the more-ideas-tabs element
+    function findMoreIdeas() {
+        const moreIdeasSelectors = [
+            '[data-root-margin="more-ideas-tabs"]',
+            '[data-test-id="more-ideas-tabs"]',
+            '[class*="more-ideas"]',
+            '[class*="MoreIdeas"]'
+        ];
         
-        if (element) {
-            if (settings.hideMoreIdeas) {
-                // Hide the element itself
-                element.style.display = 'none';
-                
-                // Hide its immediate parent
-                const parent = element.parentElement;
-                if (parent) {
-                    parent.style.display = 'none';
-                }
-                
-                console.log('Pinterest Header Hide: More ideas tabs hidden');
-            } else {
-                // Show the element
-                element.style.display = '';
-                const parent = element.parentElement;
-                if (parent) {
-                    parent.style.display = '';
-                }
-            }
-            return element;
+        let element = null;
+        for (const selector of moreIdeasSelectors) {
+            element = document.querySelector(selector);
+            if (element) break;
         }
         
-        return null;
+        return element;
     }
     
-    // Function to find and hide the vertical nav element
-    function findAndHideVerticalNav() {
-        const verticalNavSelector = '#VerticalNavContent';
-        const element = document.querySelector(verticalNavSelector);
-        
-        if (element) {
-            if (settings.hideVerticalNav) {
-                // Hide the element itself
-                element.style.display = 'none';
-                console.log('Pinterest Header Hide: Vertical nav hidden');
-            } else {
-                // Show the element
-                element.style.display = '';
-                console.log('Pinterest Header Hide: Vertical nav shown');
+    // Function to show the more-ideas-tabs element
+    function showMoreIdeas() {
+        if (moreIdeasElement && settings.hideMoreIdeas) {
+            moreIdeasElement.style.display = '';
+            const parent = moreIdeasElement.parentElement;
+            if (parent) {
+                parent.style.display = '';
             }
-            return element;
+        }
+    }
+    
+    // Function to hide the more-ideas-tabs element
+    function hideMoreIdeas() {
+        if (moreIdeasElement && settings.hideMoreIdeas) {
+            // Only hide if not already hidden to prevent loops
+            const computedStyle = window.getComputedStyle(moreIdeasElement);
+            if (computedStyle.display !== 'none') {
+                moreIdeasElement.style.display = 'none';
+                const parent = moreIdeasElement.parentElement;
+                if (parent) {
+                    const parentComputed = window.getComputedStyle(parent);
+                    if (parentComputed.display !== 'none') {
+                        parent.style.display = 'none';
+                    }
+                }
+            }
+        }
+    }
+    
+    // Function to find the vertical nav element
+    function findVerticalNav() {
+        const verticalNavSelectors = [
+            '#VerticalNavContent',
+            '[data-test-id="vertical-nav"]',
+            '[class*="vertical-nav"]',
+            '[class*="VerticalNav"]'
+        ];
+        
+        let element = null;
+        for (const selector of verticalNavSelectors) {
+            element = document.querySelector(selector);
+            if (element) break;
         }
         
-        return null;
+        return element;
+    }
+    
+    // Function to show the vertical nav element
+    function showVerticalNav() {
+        if (verticalNavElement && settings.hideVerticalNav) {
+            // Use setProperty with important to override CSS
+            verticalNavElement.style.setProperty('display', 'block', 'important');
+            // Also ensure parent is visible
+            const parent = verticalNavElement.parentElement;
+            if (parent) {
+                const parentComputed = window.getComputedStyle(parent);
+                if (parentComputed.display === 'none') {
+                    parent.style.setProperty('display', 'block', 'important');
+                }
+            }
+        }
+    }
+    
+    // Function to hide the vertical nav element
+    function hideVerticalNav() {
+        if (verticalNavElement && settings.hideVerticalNav) {
+            // Only hide if not already hidden to prevent loops
+            const computedStyle = window.getComputedStyle(verticalNavElement);
+            if (computedStyle.display !== 'none') {
+                // Use setProperty with important to override any inline styles
+                verticalNavElement.style.setProperty('display', 'none', 'important');
+            }
+        }
+    }
+    
+    // Function to find the scrollable-one-bar element
+    function findScrollableOneBar() {
+        const scrollableOneBarSelectors = [
+            '[data-test-id="scrollable-one-bar-root"]',
+            '[class*="scrollable-one-bar"]'
+        ];
+        
+        let element = null;
+        for (const selector of scrollableOneBarSelectors) {
+            element = document.querySelector(selector);
+            if (element) break;
+        }
+        
+        return element;
+    }
+    
+    // Function to show the scrollable-one-bar element
+    function showScrollableOneBar() {
+        if (scrollableOneBarElement && settings.hideScrollableOneBar) {
+            scrollableOneBarElement.style.display = '';
+        }
+    }
+    
+    // Function to hide the scrollable-one-bar element
+    function hideScrollableOneBar() {
+        if (scrollableOneBarElement && settings.hideScrollableOneBar) {
+            scrollableOneBarElement.style.display = 'none';
+        }
+    }
+    
+    // Function to find the skip to content element
+    function findSkipToContent() {
+        const skipToContentSelectors = [
+            '[data-test-id="hiddenSkipToContentContainer"]',
+            '[class*="skipToContent"]'
+        ];
+        
+        let element = null;
+        for (const selector of skipToContentSelectors) {
+            element = document.querySelector(selector);
+            if (element) break;
+        }
+        
+        return element;
+    }
+    
+    // Function to show the skip to content element
+    function showSkipToContent() {
+        if (skipToContentElement && settings.hideSkipToContent) {
+            skipToContentElement.style.display = '';
+        }
+    }
+    
+    // Function to hide the skip to content element
+    function hideSkipToContent() {
+        if (skipToContentElement && settings.hideSkipToContent) {
+            skipToContentElement.style.display = 'none';
+        }
     }
     
     // Function to update background color
@@ -100,46 +206,73 @@
         }
     }
     
+    // Function to apply liquid glass theme
+    function applyLiquidGlassTheme() {
+        if (settings.liquidGlassTheme) {
+            document.body.classList.add('liquid-glass-theme');
+            console.log('Pinterest Fullscreen: Liquid glass theme enabled');
+        } else {
+            document.body.classList.remove('liquid-glass-theme');
+            console.log('Pinterest Fullscreen: Liquid glass theme disabled');
+        }
+    }
+    
     // Function to hide the header
     function hideHeader() {
-        if (headerElement) {
+        if (headerElement && settings.hideHeader) {
             headerElement.style.transform = 'translateY(-100%)';
             headerElement.style.transition = 'transform 0.3s ease-in-out';
-            isHeaderVisible = false;
         }
     }
     
     // Function to show the header
     function showHeader() {
-        if (headerElement) {
+        if (headerElement && settings.hideHeader) {
             headerElement.style.transform = 'translateY(0)';
             headerElement.style.transition = 'transform 0.3s ease-in-out';
-            isHeaderVisible = true;
         }
+    }
+    
+    // Function to show all elements (when mouse is in top area)
+    function showAllElements() {
+        showHeader();
+        showMoreIdeas();
+        showVerticalNav();
+        showScrollableOneBar();
+        showSkipToContent();
+    }
+    
+    // Function to hide all elements (when mouse is not in top area)
+    function hideAllElements() {
+        hideHeader();
+        hideMoreIdeas();
+        hideVerticalNav();
+        hideScrollableOneBar();
+        hideSkipToContent();
     }
     
     // Function to handle mouse movement
     function handleMouseMove(event) {
-        if (!settings.hideHeader) return;
-        
         const mouseY = event.clientY;
         const threshold = settings.hoverThreshold;
+        const isInTopArea = mouseY <= threshold;
         
-        if (mouseY <= threshold) {
-            if (!isHeaderVisible) {
-                showHeader();
-            }
-            // Clear any existing timeout
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
+        // Clear any existing timeout
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+        }
+        
+        if (isInTopArea) {
+            // Mouse is in top area - show all elements
+            if (!isMouseInTopArea) {
+                isMouseInTopArea = true;
+                showAllElements();
             }
         } else {
-            // Hide header immediately when mouse moves away
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-            }
-            if (isHeaderVisible) {
-                hideHeader();
+            // Mouse is not in top area - hide all elements
+            if (isMouseInTopArea) {
+                isMouseInTopArea = false;
+                hideAllElements();
             }
         }
     }
@@ -150,12 +283,18 @@
             'hideHeader',
             'hideMoreIdeas', 
             'hideVerticalNav',
+            'hideScrollableOneBar',
+            'hideSkipToContent',
+            'liquidGlassTheme',
             'hoverThreshold',
             'bgColor'
         ], function(result) {
             settings.hideHeader = result.hideHeader !== false;
             settings.hideMoreIdeas = result.hideMoreIdeas !== false;
             settings.hideVerticalNav = result.hideVerticalNav !== false;
+            settings.hideScrollableOneBar = result.hideScrollableOneBar !== false;
+            settings.hideSkipToContent = result.hideSkipToContent !== false;
+            settings.liquidGlassTheme = result.liquidGlassTheme === true;
             settings.hoverThreshold = result.hoverThreshold || 80;
             settings.bgColor = result.bgColor || '';
             
@@ -164,29 +303,40 @@
         });
     }
     
+    // Function to find all elements
+    function findAllElements() {
+        headerElement = findHeader();
+        moreIdeasElement = findMoreIdeas();
+        verticalNavElement = findVerticalNav();
+        scrollableOneBarElement = findScrollableOneBar();
+        skipToContentElement = findSkipToContent();
+    }
+    
     // Function to apply current settings
     function applySettings() {
-        // Apply header settings
-        if (headerElement) {
-            if (settings.hideHeader) {
-                hideHeader();
-                // Add CSS class to enable hiding
-                document.body.classList.add('pinterest-header-hidden');
-            } else {
-                showHeader();
-                // Remove CSS class to disable hiding
-                document.body.classList.remove('pinterest-header-hidden');
-            }
+        // Find all elements first
+        findAllElements();
+        
+        // Add CSS class to enable hiding
+        if (settings.hideHeader || settings.hideMoreIdeas || settings.hideVerticalNav || 
+            settings.hideScrollableOneBar || settings.hideSkipToContent) {
+            document.body.classList.add('pinterest-header-hidden');
+        } else {
+            document.body.classList.remove('pinterest-header-hidden');
         }
         
-        // Apply more ideas settings
-        moreIdeasElement = findAndHideMoreIdeas();
-        
-        // Apply vertical nav settings
-        verticalNavElement = findAndHideVerticalNav();
+        // Apply initial state based on mouse position
+        if (isMouseInTopArea) {
+            showAllElements();
+        } else {
+            hideAllElements();
+        }
         
         // Apply background color
         updateBackgroundColor(settings.bgColor);
+        
+        // Apply liquid glass theme
+        applyLiquidGlassTheme();
     }
     
     // Function to initialize the extension
@@ -200,25 +350,31 @@
         // Load settings first
         loadSettings();
         
-        // Find the header element
-        headerElement = findHeader();
+        // Find all elements
+        findAllElements();
         
-        if (headerElement) {
-            console.log('Pinterest Header Hide: Header found and initialized');
+        if (headerElement || moreIdeasElement || verticalNavElement || 
+            scrollableOneBarElement || skipToContentElement) {
+            console.log('Pinterest Fullscreen: Elements found and initialized');
             
             // Add mouse move listener to the document
             document.addEventListener('mousemove', handleMouseMove);
             
-            // Also handle mouse leave events
+            // Also handle mouse leave events - hide all elements when mouse leaves window
             document.addEventListener('mouseleave', () => {
-                if (isHeaderVisible && settings.hideHeader) {
-                    hideHeader();
+                if (isMouseInTopArea) {
+                    isMouseInTopArea = false;
+                    hideAllElements();
                 }
             });
             
+            // Initialize: hide all elements by default (mouse not in top area)
+            isMouseInTopArea = false;
+            hideAllElements();
+            
         } else {
-            console.log('Pinterest Header Hide: Header not found, retrying...');
-            // Retry after a short delay if header not found
+            console.log('Pinterest Fullscreen: Elements not found, retrying...');
+            // Retry after a short delay if elements not found
             setTimeout(init, 1000);
         }
         
@@ -247,28 +403,60 @@
                 settings.bgColor = '';
                 updateBackgroundColor('');
                 break;
+            case 'toggleLiquidGlassTheme':
+                settings.liquidGlassTheme = request.data.value;
+                applyLiquidGlassTheme();
+                break;
         }
     });
     
     // Handle page navigation (for SPA behavior)
     let lastUrl = location.href;
+    let mutationTimeout = null;
+    let isProcessingMutations = false;
+    
     new MutationObserver(() => {
-        const url = location.href;
-        if (url !== lastUrl) {
-            lastUrl = url;
-            // Reinitialize when navigating to a new page
-            setTimeout(init, 500);
+        // Debounce mutation handling to prevent loops
+        if (mutationTimeout) {
+            clearTimeout(mutationTimeout);
         }
         
-        // Also check for new more-ideas-tabs elements that might appear
-        if (!moreIdeasElement) {
-            moreIdeasElement = findAndHideMoreIdeas();
-        }
-        
-        // Also check for new vertical nav elements that might appear
-        if (!verticalNavElement) {
-            verticalNavElement = findAndHideVerticalNav();
-        }
-    }).observe(document, { subtree: true, childList: true });
+        mutationTimeout = setTimeout(() => {
+            // Prevent recursive calls
+            if (isProcessingMutations) {
+                return;
+            }
+            
+            isProcessingMutations = true;
+            
+            const url = location.href;
+            if (url !== lastUrl) {
+                lastUrl = url;
+                // Reinitialize when navigating to a new page
+                setTimeout(init, 500);
+                isProcessingMutations = false;
+                return;
+            }
+            
+            // Only check for new elements, don't force hide/show if already in correct state
+            findAllElements();
+            
+            // Only update visibility if elements exist and state has changed
+            // Don't repeatedly hide elements that are already hidden
+            if (isMouseInTopArea) {
+                showAllElements();
+            } else {
+                // Only hide if elements are actually visible
+                hideAllElements();
+            }
+            
+            isProcessingMutations = false;
+        }, 500); // Debounce by 500ms to prevent rapid-fire calls
+    }).observe(document.body || document.documentElement, { 
+        subtree: true, 
+        childList: true,
+        attributes: false, // Don't observe attributes to reduce overhead
+        characterData: false
+    });
     
 })();
