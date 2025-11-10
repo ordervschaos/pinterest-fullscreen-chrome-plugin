@@ -8,7 +8,10 @@
     let scrollableOneBarElement = null;
     let skipToContentElement = null;
     let isMouseInTopArea = false;
+    let isMouseInLeftArea = false;
     let hoverTimeout = null;
+    let lastMouseY = null;
+    let lastMouseX = null;
     
     // Settings
     let settings = {
@@ -19,6 +22,7 @@
         hideSkipToContent: true,
         liquidGlassTheme: false,
         hoverThreshold: 80,
+        leftSideThreshold: 80,
         bgColor: ''
     };
     
@@ -220,61 +224,113 @@
     // Function to hide the header
     function hideHeader() {
         if (headerElement && settings.hideHeader) {
-            headerElement.style.transform = 'translateY(-100%)';
-            headerElement.style.transition = 'transform 0.3s ease-in-out';
+            // Use setProperty with important to override CSS !important rule
+            headerElement.style.setProperty('transform', 'translateY(-100%)', 'important');
+            headerElement.style.setProperty('transition', 'transform 0.3s ease-in-out', 'important');
         }
     }
     
     // Function to show the header
     function showHeader() {
         if (headerElement && settings.hideHeader) {
-            headerElement.style.transform = 'translateY(0)';
-            headerElement.style.transition = 'transform 0.3s ease-in-out';
+            // Use setProperty with important to override CSS !important rule
+            headerElement.style.setProperty('transform', 'translateY(0)', 'important');
+            headerElement.style.setProperty('transition', 'transform 0.3s ease-in-out', 'important');
+        } else if (!headerElement) {
+            // Try to find header again if it wasn't found
+            headerElement = findHeader();
+            if (headerElement && settings.hideHeader) {
+                headerElement.style.setProperty('transform', 'translateY(0)', 'important');
+                headerElement.style.setProperty('transition', 'transform 0.3s ease-in-out', 'important');
+            }
         }
     }
     
-    // Function to show all elements (when mouse is in top area)
-    function showAllElements() {
+    // Function to show top area elements (header, more ideas, scrollable bar, skip to content)
+    function showTopElements() {
+        // Ensure header element is found
+        if (!headerElement) {
+            headerElement = findHeader();
+        }
         showHeader();
         showMoreIdeas();
-        showVerticalNav();
         showScrollableOneBar();
         showSkipToContent();
     }
     
-    // Function to hide all elements (when mouse is not in top area)
-    function hideAllElements() {
+    // Function to hide top area elements
+    function hideTopElements() {
         hideHeader();
         hideMoreIdeas();
-        hideVerticalNav();
         hideScrollableOneBar();
         hideSkipToContent();
+    }
+    
+    // Function to show sidebar (vertical nav)
+    function showSidebar() {
+        showVerticalNav();
+    }
+    
+    // Function to hide sidebar
+    function hideSidebar() {
+        hideVerticalNav();
+    }
+    
+    // Function to check mouse position and update top area visibility
+    function updateTopAreaVisibility(mouseY) {
+        const threshold = settings.hoverThreshold;
+        const isInTopArea = mouseY <= threshold;
+        
+        if (isInTopArea) {
+            // Mouse is in top area - show top elements
+            if (!isMouseInTopArea) {
+                isMouseInTopArea = true;
+                showTopElements();
+            }
+        } else {
+            // Mouse is not in top area - hide top elements
+            if (isMouseInTopArea) {
+                isMouseInTopArea = false;
+                hideTopElements();
+            }
+        }
+    }
+    
+    // Function to check mouse position and update sidebar visibility
+    function updateSidebarVisibility(mouseX) {
+        const threshold = settings.leftSideThreshold;
+        const isInLeftArea = mouseX <= threshold;
+        
+        if (isInLeftArea) {
+            // Mouse is in left area - show sidebar
+            if (!isMouseInLeftArea) {
+                isMouseInLeftArea = true;
+                showSidebar();
+            }
+        } else {
+            // Mouse is not in left area - hide sidebar
+            if (isMouseInLeftArea) {
+                isMouseInLeftArea = false;
+                hideSidebar();
+            }
+        }
     }
     
     // Function to handle mouse movement
     function handleMouseMove(event) {
         const mouseY = event.clientY;
-        const threshold = settings.hoverThreshold;
-        const isInTopArea = mouseY <= threshold;
+        const mouseX = event.clientX;
+        lastMouseY = mouseY;
+        lastMouseX = mouseX;
         
         // Clear any existing timeout
         if (hoverTimeout) {
             clearTimeout(hoverTimeout);
         }
         
-        if (isInTopArea) {
-            // Mouse is in top area - show all elements
-            if (!isMouseInTopArea) {
-                isMouseInTopArea = true;
-                showAllElements();
-            }
-        } else {
-            // Mouse is not in top area - hide all elements
-            if (isMouseInTopArea) {
-                isMouseInTopArea = false;
-                hideAllElements();
-            }
-        }
+        // Update visibility based on mouse position (both X and Y)
+        updateTopAreaVisibility(mouseY);
+        updateSidebarVisibility(mouseX);
     }
     
     // Function to load settings from storage
@@ -287,6 +343,7 @@
             'hideSkipToContent',
             'liquidGlassTheme',
             'hoverThreshold',
+            'leftSideThreshold',
             'bgColor'
         ], function(result) {
             settings.hideHeader = result.hideHeader !== false;
@@ -296,6 +353,7 @@
             settings.hideSkipToContent = result.hideSkipToContent !== false;
             settings.liquidGlassTheme = result.liquidGlassTheme === true;
             settings.hoverThreshold = result.hoverThreshold || 80;
+            settings.leftSideThreshold = result.leftSideThreshold || 80;
             settings.bgColor = result.bgColor || '';
             
             // Apply settings
@@ -327,9 +385,15 @@
         
         // Apply initial state based on mouse position
         if (isMouseInTopArea) {
-            showAllElements();
+            showTopElements();
         } else {
-            hideAllElements();
+            hideTopElements();
+        }
+        
+        if (isMouseInLeftArea) {
+            showSidebar();
+        } else {
+            hideSidebar();
         }
         
         // Apply background color
@@ -364,13 +428,32 @@
             document.addEventListener('mouseleave', () => {
                 if (isMouseInTopArea) {
                     isMouseInTopArea = false;
-                    hideAllElements();
+                    hideTopElements();
+                }
+                if (isMouseInLeftArea) {
+                    isMouseInLeftArea = false;
+                    hideSidebar();
                 }
             });
             
-            // Initialize: hide all elements by default (mouse not in top area)
+            // Track mouse position on mouseenter to catch cases where mouse is already in top/left area
+            document.addEventListener('mouseenter', function(event) {
+                if (event.clientY !== undefined) {
+                    lastMouseY = event.clientY;
+                    updateTopAreaVisibility(event.clientY);
+                }
+                if (event.clientX !== undefined) {
+                    lastMouseX = event.clientX;
+                    updateSidebarVisibility(event.clientX);
+                }
+            });
+            
+            // Initialize: hide all elements by default
+            // The first mousemove event will update visibility based on actual mouse position
             isMouseInTopArea = false;
-            hideAllElements();
+            isMouseInLeftArea = false;
+            hideTopElements();
+            hideSidebar();
             
         } else {
             console.log('Pinterest Fullscreen: Elements not found, retrying...');
@@ -394,6 +477,17 @@
                 break;
             case 'updateHoverThreshold':
                 settings.hoverThreshold = request.data;
+                // Re-check visibility if we have a last known mouse position
+                if (lastMouseY !== null) {
+                    updateTopAreaVisibility(lastMouseY);
+                }
+                break;
+            case 'updateLeftSideThreshold':
+                settings.leftSideThreshold = request.data;
+                // Re-check sidebar visibility if we have a last known mouse position
+                if (lastMouseX !== null) {
+                    updateSidebarVisibility(lastMouseX);
+                }
                 break;
             case 'updateBgColor':
                 settings.bgColor = request.data;
@@ -444,10 +538,15 @@
             // Only update visibility if elements exist and state has changed
             // Don't repeatedly hide elements that are already hidden
             if (isMouseInTopArea) {
-                showAllElements();
+                showTopElements();
             } else {
-                // Only hide if elements are actually visible
-                hideAllElements();
+                hideTopElements();
+            }
+            
+            if (isMouseInLeftArea) {
+                showSidebar();
+            } else {
+                hideSidebar();
             }
             
             isProcessingMutations = false;
