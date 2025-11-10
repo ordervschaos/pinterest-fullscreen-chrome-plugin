@@ -1,6 +1,8 @@
 # Pinterest Fullscreen
 
 Transform Pinterest into a distraction-free, fullscreen viewing experience. Maximize your screen real estate and immerse yourself in beautiful content without the clutter.
+<img width="1440" height="867" alt="image" src="https://github.com/user-attachments/assets/ec1b5b57-c9b9-4d1a-b9e0-d6ba5c6ed2bb" />
+
 
 ## Why Pinterest Fullscreen?
 
