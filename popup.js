@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const hideHeaderToggle = document.getElementById('hideHeaderToggle');
     const hideMoreIdeasToggle = document.getElementById('hideMoreIdeasToggle');
     const hideVerticalNavToggle = document.getElementById('hideVerticalNavToggle');
-    const liquidGlassToggle = document.getElementById('liquidGlassToggle');
     const hoverThresholdInput = document.getElementById('hoverThreshold');
     const bgColorInput = document.getElementById('bgColorInput');
     const resetBgColorBtn = document.getElementById('resetBgColor');
@@ -24,10 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     hideVerticalNavToggle.addEventListener('click', function() {
         toggleSetting('hideVerticalNav', hideVerticalNavToggle);
-    });
-
-    liquidGlassToggle.addEventListener('click', function() {
-        toggleSetting('liquidGlassTheme', liquidGlassToggle);
     });
 
     hoverThresholdInput.addEventListener('input', function() {
@@ -58,7 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'hideHeader',
             'hideMoreIdeas', 
             'hideVerticalNav',
-            'liquidGlassTheme',
             'hoverThreshold',
             'bgColor'
         ], function(result) {
@@ -66,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
             hideHeaderToggle.classList.toggle('active', result.hideHeader !== false);
             hideMoreIdeasToggle.classList.toggle('active', result.hideMoreIdeas !== false);
             hideVerticalNavToggle.classList.toggle('active', result.hideVerticalNav !== false);
-            liquidGlassToggle.classList.toggle('active', result.liquidGlassTheme === true);
             
             // Set threshold
             hoverThresholdInput.value = result.hoverThreshold || 80;
@@ -87,8 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const settingLabels = {
             'hideHeader': 'Header hiding',
             'hideMoreIdeas': 'More Ideas tabs',
-            'hideVerticalNav': 'Vertical navigation',
-            'liquidGlassTheme': 'Liquid Glass theme'
+            'hideVerticalNav': 'Vertical navigation'
         };
         
         showStatus(`${settingLabels[settingName]} ${!isActive ? 'enabled' : 'disabled'}`);

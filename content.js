@@ -20,7 +20,6 @@
         hideVerticalNav: true,
         hideScrollableOneBar: true,
         hideSkipToContent: true,
-        liquidGlassTheme: false,
         hoverThreshold: 80,
         leftSideThreshold: 80,
         bgColor: ''
@@ -210,17 +209,6 @@
         }
     }
     
-    // Function to apply liquid glass theme
-    function applyLiquidGlassTheme() {
-        if (settings.liquidGlassTheme) {
-            document.body.classList.add('liquid-glass-theme');
-            console.log('Pinterest Fullscreen: Liquid glass theme enabled');
-        } else {
-            document.body.classList.remove('liquid-glass-theme');
-            console.log('Pinterest Fullscreen: Liquid glass theme disabled');
-        }
-    }
-    
     // Function to hide the header
     function hideHeader() {
         if (headerElement && settings.hideHeader) {
@@ -341,7 +329,6 @@
             'hideVerticalNav',
             'hideScrollableOneBar',
             'hideSkipToContent',
-            'liquidGlassTheme',
             'hoverThreshold',
             'leftSideThreshold',
             'bgColor'
@@ -351,7 +338,6 @@
             settings.hideVerticalNav = result.hideVerticalNav !== false;
             settings.hideScrollableOneBar = result.hideScrollableOneBar !== false;
             settings.hideSkipToContent = result.hideSkipToContent !== false;
-            settings.liquidGlassTheme = result.liquidGlassTheme === true;
             settings.hoverThreshold = result.hoverThreshold || 80;
             settings.leftSideThreshold = result.leftSideThreshold || 80;
             settings.bgColor = result.bgColor || '';
@@ -398,9 +384,6 @@
         
         // Apply background color
         updateBackgroundColor(settings.bgColor);
-        
-        // Apply liquid glass theme
-        applyLiquidGlassTheme();
     }
     
     // Function to initialize the extension
@@ -496,10 +479,6 @@
             case 'resetBgColor':
                 settings.bgColor = '';
                 updateBackgroundColor('');
-                break;
-            case 'toggleLiquidGlassTheme':
-                settings.liquidGlassTheme = request.data.value;
-                applyLiquidGlassTheme();
                 break;
         }
     });

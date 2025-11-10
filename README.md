@@ -27,7 +27,6 @@ Pinterest is a visual discovery platform, but the default interface can be distr
 - Hide vertical navigation sidebar
 - Adjust hover threshold for header appearance
 - Custom background colors
-- Optional liquid glass theme for a modern aesthetic
 
 ### Smart Behavior
 - Works seamlessly with Pinterest's single-page application (SPA) navigation
@@ -51,7 +50,6 @@ Pinterest is a visual discovery platform, but the default interface can be distr
    - Adjust hover threshold (how close to top before header appears)
    - Hide additional UI elements
    - Customize background colors
-   - Enable liquid glass theme
 
 ## Technical Details
 
@@ -59,14 +57,14 @@ The extension uses content scripts to:
 - Identify and hide Pinterest UI elements using multiple selector strategies
 - Monitor mouse movements to show/hide the header intelligently
 - Handle Pinterest's dynamic page navigation
-- Apply custom styling and themes
+- Apply custom styling
 
 ## Files
 
 - `manifest.json` - Extension configuration
 - `content.js` - Main script that handles fullscreen mode and UI element management
 - `popup.html` / `popup.js` - Settings interface for customization
-- `styles.css` - CSS styles for smooth transitions and themes
+- `styles.css` - CSS styles for smooth transitions
 - `README.md` - This file
 
 ## Browser Compatibility
